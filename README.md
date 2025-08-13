@@ -119,3 +119,4 @@ This project is open source and available under the MIT License.
 "# backend-and-frontend-course-registration-system" 
 "# backend-and-frontend-course-registration-system" 
 "# backend-and-frontend-course-registration-system" 
+"# Magical-Pets-Kingdom-OOP-Project-SFML" 

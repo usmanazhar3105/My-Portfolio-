@@ -316,6 +316,69 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // ==========================
+    // Auto website thumbnails
+    // ==========================
+    function getThumbnailCandidates(siteUrl) {
+        if (!siteUrl || siteUrl === '#') return [];
+        const clean = siteUrl.trim();
+        // Try multiple free providers in order
+        return [
+            // WordPress mShots (often works from local files too)
+            `https://s.wordpress.com/mshots/v1/${encodeURIComponent(clean)}?w=1200` ,
+            // thum.io
+            `https://image.thum.io/get/width/1200/crop/700/${encodeURIComponent(clean)}`
+        ];
+    }
+
+    function setProjectCardThumbnail(card) {
+        const imageEl = card.querySelector('.project-image');
+        if (!imageEl) return;
+
+        // Priority: data-demo-url attribute, otherwise the external link in project links
+        let demoUrl = card.getAttribute('data-demo-url');
+        if (!demoUrl) {
+            const externalLink = card.querySelector('.project-links a[href^="http"]:not([href*="github.com"])');
+            if (externalLink) demoUrl = externalLink.getAttribute('href');
+        }
+
+        const candidates = getThumbnailCandidates(demoUrl);
+        if (candidates.length === 0) return;
+
+        // Try providers sequentially, only set when loaded
+        const tryNext = () => {
+            const next = candidates.shift();
+            if (!next) return; // no provider worked
+            const img = new Image();
+            // Add cache-busting in case of stale images
+            const src = `${next}${next.includes('?') ? '&' : '?'}_=${Date.now()}`;
+            img.onload = () => {
+                imageEl.style.backgroundImage = `url('${src}')`;
+                imageEl.style.backgroundSize = 'cover';
+                imageEl.style.backgroundPosition = 'center';
+            };
+            img.onerror = tryNext;
+            img.src = src;
+        };
+        tryNext();
+    }
+
+    function initializeProjectThumbnails(root=document) {
+        root.querySelectorAll('.project-card').forEach(setProjectCardThumbnail);
+    }
+
+    // Initialize once on load
+    initializeProjectThumbnails();
+
+    // Observe for dynamic updates (auto update system)
+    const projectsRoot = document.querySelector('#projects');
+    if (projectsRoot && 'MutationObserver' in window) {
+        const observer = new MutationObserver(() => {
+            initializeProjectThumbnails(projectsRoot);
+        });
+        observer.observe(projectsRoot, { childList: true, subtree: true, attributes: true, attributeFilter: ['href', 'data-demo-url'] });
+    }
+
     // Add ripple effect to buttons
     const buttons = document.querySelectorAll('.cta-button, .submit-btn');
     buttons.forEach(button => {

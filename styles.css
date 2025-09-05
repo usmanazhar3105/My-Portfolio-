@@ -539,6 +539,17 @@ body {
     background: linear-gradient(135deg, #8b5cf6, #ec4899);
     position: relative;
     overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.project-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at top, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.55) 70%);
+    pointer-events: none;
 }
 
 .project-overlay {
